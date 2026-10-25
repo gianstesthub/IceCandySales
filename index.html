@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Candy Sales Counter 🍧</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tropical: {
+                            pink: '#FF6B8B',
+                            teal: '#00C9A7',
+                            yellow: '#FFC75F',
+                            orange: '#FF9671',
+                            purple: '#845EC2',
+                            dark: '#2C3E50',
+                            bg: '#FFF8F0'
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['Fredoka', 'sans-serif'],
+                        body: ['Quicksand', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #FFF8F0;
+            background-image: radial-gradient(#FFC75F 0.75px, transparent 0.75px), radial-gradient(#FF6B8B 0.75px, #FFF8F0 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+        .bounce-btn:active {
+            transform: scale(0.92);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #FF9671;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen pb-12">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b-4 border-tropical-yellow shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-4xl leading-none select-none">🍧</span>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-tropical-dark tracking-wide">Ice Candy Tracker</h1>
+                    <p class="text-xs text-gray-500 font-medium">Daily Sales & Inventory Log</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="openFlavorModal()" class="bg-tropical-purple/10 text-tropical-purple hover:bg-tropical-purple/20 font-bold px-3 py-2 rounded-xl text-sm flex items-center transition bounce-btn">
+                    <i class="fa-solid fa-gear sm:mr-1"></i>
+                    <span class="hidden sm:inline">Manage Flavors</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 mt-6 space-y-6">
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Revenue Card -->
+            <div class="bg-gradient-to-br from-tropical-pink to-rose-400 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -right-4 -bottom-4 text-white/20 text-7xl font-bold select-none">₱</div>
+                <div class="flex justify-between items-start">
+                    <span class="text-xs uppercase tracking-wider font-bold opacity-80">Total Revenue</span>
+                    <span class="p-2 bg-white/20 rounded-lg"><i class="fa-solid fa-coins text-lg"></i></span>
+                </div>
+                <div class="mt-4">
+                    <h2 class="text-3xl font-extrabold tracking-tight" id="metric-revenue">₱0.00</h2>
+                    <p class="text-xs opacity-90 mt-1" id="metric-avg-price">Avg ~₱0.00 / candy</p>
+                </div>
+            </div>
+
+            <!-- Items Sold Card -->
+            <div class="bg-gradient-to-br from-tropical-teal to-emerald-400 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -right-4 -bottom-4 text-white/20 text-7xl font-bold select-none"><i class="fa-solid fa-ice-cream"></i></div>
+                <div class="flex justify-between items-start">
+                    <span class="text-xs uppercase tracking-wider font-bold opacity-80">Total Candies Sold</span>
+                    <span class="p-2 bg-white/20 rounded-lg"><i class="fa-solid fa-box-open text-lg"></i></span>
+                </div>
+                <div class="mt-4">
+                    <h2 class="text-3xl font-extrabold tracking-tight" id="metric-total-qty">0 pcs</h2>
+                    <p class="text-xs opacity-90 mt-1" id="metric-transactions">0 total sales entries</p>
+                </div>
+            </div>
+
+            <!-- Top Flavor Card -->
+            <div class="bg-gradient-to-br from-tropical-yellow to-amber-400 text-tropical-dark p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -right-2 -bottom-2 text-tropical-dark/10 text-7xl font-bold select-none">🏆</div>
+                <div class="flex justify-between items-start">
+                    <span class="text-xs uppercase tracking-wider font-bold opacity-75">Best Seller</span>
+                    <span class="p-2 bg-tropical-dark/10 rounded-lg"><i class="fa-solid fa-trophy text-lg"></i></span>
+                </div>
+                <div class="mt-4">
+                    <h2 class="text-2xl font-extrabold truncate" id="metric-top-flavor">None yet</h2>
+                    <p class="text-xs opacity-80 mt-1" id="metric-top-flavor-count">0 sold so far</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Target Progress Bar -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-100">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="font-bold text-tropical-dark text-base">Daily Target Goal</h3>
+                        <button onclick="openTargetModal()" class="text-gray-400 hover:text-tropical-purple transition text-xs">
+                            <i class="fa-solid fa-pen"></i> Edit Target
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500" id="target-description">Target Revenue: ₱500.00</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-sm font-extrabold text-tropical-purple" id="target-percent">0%</span>
+                    <span class="text-xs text-gray-400"> completed</span>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 h-4 rounded-full overflow-hidden p-0.5">
+                <div id="target-progress-bar" class="h-full bg-gradient-to-r from-tropical-yellow via-tropical-orange to-tropical-pink rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Flavors Grid & Counter Panel (2 Cols) -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-tropical-dark flex items-center">
+                        <i class="fa-solid fa-cubes text-tropical-pink mr-2"></i> Flavors & Quick Add
+                    </h3>
+                    <span class="text-xs bg-tropical-pink/10 text-tropical-pink font-semibold px-2.5 py-1 rounded-full">Tap card to select</span>
+                </div>
+
+                <!-- Flavor Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="flavor-cards-container">
+                    <!-- Dynamic Flavor Cards injected by JS -->
+                </div>
+
+                <!-- Active Flavor Counter Box -->
+                <div class="bg-white rounded-2xl p-5 shadow-md border-2 border-tropical-teal/30 relative" id="counter-box">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-3xl" id="active-flavor-emoji">🥭</span>
+                            <div>
+                                <h4 class="font-bold text-lg text-tropical-dark" id="active-flavor-name">Mango</h4>
+                                <span class="text-xs font-semibold text-tropical-teal bg-tropical-teal/10 px-2 py-0.5 rounded-md" id="active-flavor-price">₱10.00 each</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-400 block">Current Flavor Total</span>
+                            <span class="font-bold text-lg text-tropical-dark" id="active-flavor-sales">0 sold</span>
+                        </div>
+                    </div>
+
+                    <!-- Counter Controls -->
+                    <div class="space-y-4">
+                        <!-- Quick Add Buttons -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="addSales(1)" class="bg-tropical-teal text-white font-bold py-3 px-2 rounded-xl shadow hover:bg-teal-600 transition bounce-btn flex flex-col items-center justify-center">
+                                <span class="text-lg">+1</span>
+                                <span class="text-[10px] font-normal opacity-90" id="btn-add-1-val">+₱10</span>
+                            </button>
+                            <button onclick="addSales(5)" class="bg-tropical-purple text-white font-bold py-3 px-2 rounded-xl shadow hover:bg-purple-700 transition bounce-btn flex flex-col items-center justify-center">
+                                <span class="text-lg">+5</span>
+                                <span class="text-[10px] font-normal opacity-90" id="btn-add-5-val">+₱50</span>
+                            </button>
+                            <button onclick="addSales(10)" class="bg-tropical-orange text-white font-bold py-3 px-2 rounded-xl shadow hover:bg-orange-600 transition bounce-btn flex flex-col items-center justify-center">
+                                <span class="text-lg">+10</span>
+                                <span class="text-[10px] font-normal opacity-90" id="btn-add-10-val">+₱100</span>
+                            </button>
+                        </div>
+
+                        <!-- Manual Entry Row -->
+                        <div class="flex items-center space-x-2 pt-2">
+                            <div class="relative flex-1">
+                                <input type="number" id="manual-qty-input" min="1" placeholder="Custom quantity..." class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 px-3 text-sm focus:outline-none focus:border-tropical-teal">
+                            </div>
+                            <button onclick="addManualSales()" class="bg-tropical-dark text-white font-bold px-5 py-2.5 rounded-xl hover:bg-slate-700 transition bounce-btn text-sm whitespace-nowrap">
+                                Add Custom
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Log & Controls (1 Col) -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-tropical-dark flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-tropical-purple mr-2"></i> Recent Activity Log
+                    </h3>
+                    <button onclick="undoLastTransaction()" class="text-xs text-tropical-purple font-semibold hover:underline flex items-center">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Undo Last
+                    </button>
+                </div>
+
+                <!-- Sales History List -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 h-80 flex flex-col">
+                    <div id="history-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                        <!-- Dynamic sales items injected here -->
+                    </div>
+                </div>
+
+                <!-- Utilities & Danger Zone -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400">Data Management</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="exportCSV()" class="w-full bg-emerald-50 text-emerald-600 font-bold border border-emerald-200 hover:bg-emerald-100 py-2.5 rounded-xl text-xs flex items-center justify-center transition">
+                            <i class="fa-solid fa-file-csv mr-1.5 text-sm"></i> Export CSV
+                        </button>
+                        <button onclick="confirmReset()" class="w-full bg-rose-50 text-rose-600 font-bold border border-rose-200 hover:bg-rose-100 py-2.5 rounded-xl text-xs flex items-center justify-center transition">
+                            <i class="fa-solid fa-trash-can mr-1.5 text-sm"></i> Reset Today
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal: Manage Flavors -->
+    <div id="flavor-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-tropical-dark">Manage Flavors & Prices</h3>
+                <button onclick="closeFlavorModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- Existing Flavors Edit -->
+            <div id="modal-flavor-list" class="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-1">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Add New Flavor Form -->
+            <div class="border-t pt-4 space-y-3">
+                <h4 class="text-xs font-bold uppercase text-gray-400">Add New Flavor</h4>
+                <div class="grid grid-cols-4 gap-2">
+                    <input type="text" id="new-flavor-emoji" placeholder="Emoji" class="bg-gray-50 border rounded-xl px-2 py-2 text-center text-sm" value="🍧">
+                    <input type="text" id="new-flavor-name" placeholder="Flavor Name" class="col-span-2 bg-gray-50 border rounded-xl px-3 py-2 text-sm">
+                    <input type="number" id="new-flavor-price" placeholder="Price" class="bg-gray-50 border rounded-xl px-2 py-2 text-sm" value="10">
+                </div>
+                <button onclick="addNewFlavor()" class="w-full bg-tropical-teal text-white font-bold py-2.5 rounded-xl hover:bg-teal-600 transition text-sm">
+                    + Add Flavor
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Target Configuration -->
+    <div id="target-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-tropical-dark">Set Daily Target</h3>
+                <button onclick="closeTargetModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Target Mode</label>
+                    <select id="target-type-select" class="w-full bg-gray-50 border rounded-xl p-2.5 text-sm" onchange="toggleTargetTypeInput()">
+                        <option value="revenue">Target Revenue (₱)</option>
+                        <option value="quantity">Target Quantity (pieces)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase block mb-1" id="target-value-label">Target Amount</label>
+                    <input type="number" id="target-value-input" class="w-full bg-gray-50 border rounded-xl p-2.5 text-sm font-bold" min="1" value="500">
+                </div>
+            </div>
+
+            <button onclick="saveTargetSettings()" class="w-full bg-tropical-purple text-white font-bold py-2.5 rounded-xl hover:bg-purple-700 transition text-sm">
+                Save Target
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Box -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-tropical-dark text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 transition-opacity duration-300 opacity-0 pointer-events-none z-50">
+        <span id="toast-icon" class="text-xl">✨</span>
+        <span id="toast-message" class="text-sm font-semibold">Message recorded</span>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Default Flavor Palette
+        const DEFAULT_FLAVORS = [
+            { id: 'mango', name: 'Mango', price: 10, emoji: '🥭', color: 'bg-amber-100 border-amber-300 text-amber-900' },
+            { id: 'chocolate', name: 'Chocolate', price: 10, emoji: '🍫', color: 'bg-amber-900/10 border-amber-800/30 text-amber-950' },
+            { id: 'avocado', name: 'Avocado', price: 12, emoji: '🥑', color: 'bg-emerald-100 border-emerald-300 text-emerald-900' },
+            { id: 'bukopandan', name: 'Buko Pandan', price: 10, emoji: '🥥', color: 'bg-green-100 border-green-300 text-green-900' },
+            { id: 'melon', name: 'Melon', price: 10, emoji: '🍈', color: 'bg-orange-100 border-orange-300 text-orange-900' },
+            { id: 'uBE', name: 'Ube', price: 12, emoji: '🍠', color: 'bg-purple-100 border-purple-300 text-purple-900' }
+        ];
+
+        // State variables
+        let flavors = [];
+        let salesLog = [];
+        let activeFlavorId = '';
+        let targetConfig = { type: 'revenue', value: 500 };
+
+        // Initialize App
+        window.onload = function() {
+            loadState();
+            renderFlavors();
+            if (flavors.length > 0 && !activeFlavorId) {
+                activeFlavorId = flavors[0].id;
+            }
+            updateActiveFlavorUI();
+            renderSalesHistory();
+            calculateMetrics();
+        };
+
+        // --- Data Storage Helpers ---
+        function saveState() {
+            localStorage.setItem('icecandy_flavors', JSON.stringify(flavors));
+            localStorage.setItem('icecandy_sales', JSON.stringify(salesLog));
+            localStorage.setItem('icecandy_target', JSON.stringify(targetConfig));
+            localStorage.setItem('icecandy_active_flavor', activeFlavorId);
+        }
+
+        function loadState() {
+            const storedFlavors = localStorage.getItem('icecandy_flavors');
+            const storedSales = localStorage.getItem('icecandy_sales');
+            const storedTarget = localStorage.getItem('icecandy_target');
+            const storedActive = localStorage.getItem('icecandy_active_flavor');
+
+            flavors = storedFlavors ? JSON.parse(storedFlavors) : DEFAULT_FLAVORS;
+            salesLog = storedSales ? JSON.parse(storedSales) : [];
+            targetConfig = storedTarget ? JSON.parse(storedTarget) : { type: 'revenue', value: 500 };
+            activeFlavorId = storedActive || (flavors[0] ? flavors[0].id : '');
+        }
+
+        // --- Core UI Renderers ---
+        function renderFlavors() {
+            const container = document.getElementById('flavor-cards-container');
+            container.innerHTML = '';
+
+            flavors.forEach(flavor => {
+                const isSelected = flavor.id === activeFlavorId;
+                const totalSoldForFlavor = getFlavorTotalSold(flavor.id);
+
+                const card = document.createElement('div');
+                card.className = `cursor-pointer p-3.5 rounded-2xl border-2 transition-all duration-200 flex flex-col justify-between ${
+                    isSelected 
+                        ? 'border-tropical-teal bg-white shadow-md ring-2 ring-tropical-teal/30 scale-[1.02]' 
+                        : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm'
+                }`;
+                card.onclick = () => selectFlavor(flavor.id);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <span class="text-2xl">${flavor.emoji}</span>
+                        <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">₱${flavor.price.toFixed(2)}</span>
+                    </div>
+                    <div class="mt-3">
+                        <h4 class="font-bold text-sm text-tropical-dark leading-tight">${flavor.name}</h4>
+                        <div class="flex justify-between items-center mt-1">
+                            <span class="text-[11px] text-gray-400">Sold:</span>
+                            <span class="text-xs font-extrabold text-tropical-purple">${totalSoldForFlavor} pcs</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectFlavor(id) {
+            activeFlavorId = id;
+            renderFlavors();
+            updateActiveFlavorUI();
+            saveState();
+        }
+
+        function updateActiveFlavorUI() {
+            const flavor = flavors.find(f => f.id === activeFlavorId);
+            if (!flavor) return;
+
+            document.getElementById('active-flavor-emoji').textContent = flavor.emoji;
+            document.getElementById('active-flavor-name').textContent = flavor.name;
+            document.getElementById('active-flavor-price').textContent = `₱${flavor.price.toFixed(2)} each`;
+            document.getElementById('active-flavor-sales').textContent = `${getFlavorTotalSold(flavor.id)} sold`;
+
+            // Update button labels with dollar values
+            document.getElementById('btn-add-1-val').textContent = `+₱${(flavor.price * 1).toFixed(0)}`;
+            document.getElementById('btn-add-5-val').textContent = `+₱${(flavor.price * 5).toFixed(0)}`;
+            document.getElementById('btn-add-10-val').textContent = `+₱${(flavor.price * 10).toFixed(0)}`;
+        }
+
+        function getFlavorTotalSold(flavorId) {
+            return salesLog
+                .filter(item => item.flavorId === flavorId)
+                .reduce((sum, item) => sum + item.quantity, 0);
+        }
+
+        // --- Sales Operations ---
+        function addSales(qty) {
+            const flavor = flavors.find(f => f.id === activeFlavorId);
+            if (!flavor) {
+                showToast('Please select a flavor first!', '⚠️');
+                return;
+            }
+
+            const transaction = {
+                id: 'tx_' + Date.now(),
+                flavorId: flavor.id,
+                flavorName: flavor.name,
+                flavorEmoji: flavor.emoji,
+                quantity: qty,
+                unitPrice: flavor.price,
+                totalPrice: qty * flavor.price,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            salesLog.unshift(transaction);
+            saveState();
+
+            // Refresh UI
+            renderFlavors();
+            updateActiveFlavorUI();
+            renderSalesHistory();
+            calculateMetrics();
+
+            showToast(`Added +${qty} ${flavor.name} (₱${transaction.totalPrice.toFixed(2)})`, '✨');
+        }
+
+        function addManualSales() {
+            const input = document.getElementById('manual-qty-input');
+            const qty = parseInt(input.value);
+
+            if (isNaN(qty) || qty <= 0) {
+                showToast('Enter a valid quantity', '⚠️');
+                return;
+            }
+
+            addSales(qty);
+            input.value = '';
+        }
+
+        function undoLastTransaction() {
+            if (salesLog.length === 0) {
+                showToast('No transaction to undo', 'ℹ️');
+                return;
+            }
+
+            const removed = salesLog.shift();
+            saveState();
+
+            renderFlavors();
+            updateActiveFlavorUI();
+            renderSalesHistory();
+            calculateMetrics();
+
+            showToast(`Undid sale of ${removed.quantity}x ${removed.flavorName}`, '↩️');
+        }
+
+        function deleteTransaction(txId) {
+            salesLog = salesLog.filter(item => item.id !== txId);
+            saveState();
+
+            renderFlavors();
+            updateActiveFlavorUI();
+            renderSalesHistory();
+            calculateMetrics();
+
+            showToast('Entry deleted', '🗑️');
+        }
+
+        // --- Sales History Render ---
+        function renderSalesHistory() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            if (salesLog.length === 0) {
+                container.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-gray-300 py-8">
+                        <i class="fa-solid fa-receipt text-3xl mb-2"></i>
+                        <p class="text-xs">No sales logged today yet!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            salesLog.forEach(tx => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2.5 bg-gray-50 rounded-xl hover:bg-gray-100 transition group';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2.5">
+                        <span class="text-xl">${tx.flavorEmoji}</span>
+                        <div>
+                            <div class="text-xs font-bold text-tropical-dark">${tx.flavorName} <span class="text-gray-400 font-normal">x${tx.quantity}</span></div>
+                            <div class="text-[10px] text-gray-400">${tx.timestamp}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-extrabold text-tropical-teal">+₱${tx.totalPrice.toFixed(2)}</span>
+                        <button onclick="deleteTransaction('${tx.id}')" class="text-gray-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition px-1">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // --- Real-time Metrics & Calculations ---
+        function calculateMetrics() {
+            const totalRevenue = salesLog.reduce((sum, item) => sum + item.totalPrice, 0);
+            const totalQty = salesLog.reduce((sum, item) => sum + item.quantity, 0);
+
+            // Revenue Card
+            document.getElementById('metric-revenue').textContent = `₱${totalRevenue.toFixed(2)}`;
+            const avgPrice = totalQty > 0 ? (totalRevenue / totalQty) : 0;
+            document.getElementById('metric-avg-price').textContent = `Avg ~₱${avgPrice.toFixed(2)} / candy`;
+
+            // Quantity Card
+            document.getElementById('metric-total-qty').textContent = `${totalQty} pcs`;
+            document.getElementById('metric-transactions').textContent = `${salesLog.length} total sales entries`;
+
+            // Top Seller calculation
+            const flavorCounts = {};
+            salesLog.forEach(item => {
+                flavorCounts[item.flavorId] = (flavorCounts[item.flavorId] || 0) + item.quantity;
+            });
+
+            let topFlavorId = null;
+            let maxCount = 0;
+            for (const [fId, count] of Object.entries(flavorCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    topFlavorId = fId;
+                }
+            }
+
+            if (topFlavorId) {
+                const topFlavor = flavors.find(f => f.id === topFlavorId);
+                document.getElementById('metric-top-flavor').textContent = `${topFlavor ? topFlavor.emoji : ''} ${topFlavor ? topFlavor.name : 'Unknown'}`;
+                document.getElementById('metric-top-flavor-count').textContent = `${maxCount} pcs sold`;
+            } else {
+                document.getElementById('metric-top-flavor').textContent = 'None yet';
+                document.getElementById('metric-top-flavor-count').textContent = '0 sold so far';
+            }
+
+            // Target Progress Calculation
+            let progressPercent = 0;
+            if (targetConfig.type === 'revenue') {
+                progressPercent = targetConfig.value > 0 ? (totalRevenue / targetConfig.value) * 100 : 0;
+                document.getElementById('target-description').textContent = `Target Revenue: ₱${targetConfig.value.toFixed(2)}`;
+            } else {
+                progressPercent = targetConfig.value > 0 ? (totalQty / targetConfig.value) * 100 : 0;
+                document.getElementById('target-description').textContent = `Target Quantity: ${targetConfig.value} pcs`;
+            }
+
+            const clampedPercent = Math.min(Math.round(progressPercent), 100);
+            document.getElementById('target-percent').textContent = `${clampedPercent}%`;
+            document.getElementById('target-progress-bar').style.width = `${clampedPercent}%`;
+        }
+
+        // --- Flavor Modal Functions ---
+        function openFlavorModal() {
+            renderModalFlavorList();
+            document.getElementById('flavor-modal').classList.remove('hidden');
+        }
+
+        function closeFlavorModal() {
+            document.getElementById('flavor-modal').classList.add('hidden');
+        }
+
+        function renderModalFlavorList() {
+            const list = document.getElementById('modal-flavor-list');
+            list.innerHTML = '';
+
+            flavors.forEach(f => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-2.5 bg-gray-50 rounded-xl space-x-2';
+                row.innerHTML = `
+                    <div class="flex items-center space-x-2 flex-1">
+                        <span class="text-xl">${f.emoji}</span>
+                        <span class="font-bold text-sm text-tropical-dark">${f.name}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-semibold text-gray-500">₱</span>
+                        <input type="number" value="${f.price}" min="0" step="0.5" 
+                            onchange="updateFlavorPrice('${f.id}', this.value)"
+                            class="w-16 bg-white border rounded-lg px-2 py-1 text-xs text-right font-bold">
+                        <button onclick="removeFlavor('${f.id}')" class="text-rose-400 hover:text-rose-600 p-1">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function updateFlavorPrice(flavorId, newPrice) {
+            const priceVal = parseFloat(newPrice);
+            if (isNaN(priceVal) || priceVal < 0) return;
+
+            const flavor = flavors.find(f => f.id === flavorId);
+            if (flavor) {
+                flavor.price = priceVal;
+                saveState();
+                renderFlavors();
+                updateActiveFlavorUI();
+            }
+        }
+
+        function addNewFlavor() {
+            const emoji = document.getElementById('new-flavor-emoji').value.trim() || '🍧';
+            const name = document.getElementById('new-flavor-name').value.trim();
+            const price = parseFloat(document.getElementById('new-flavor-price').value);
+
+            if (!name) {
+                showToast('Please enter a flavor name', '⚠️');
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                showToast('Please enter a valid price', '⚠️');
+                return;
+            }
+
+            const id = 'flavor_' + Date.now();
+            flavors.push({ id, name, price, emoji });
+            saveState();
+
+            document.getElementById('new-flavor-name').value = '';
+            renderModalFlavorList();
+            renderFlavors();
+
+            showToast(`Added new flavor: ${name}`, '✨');
+        }
+
+        function removeFlavor(id) {
+            if (flavors.length <= 1) {
+                showToast('You must keep at least one flavor!', '⚠️');
+                return;
+            }
+
+            flavors = flavors.filter(f => f.id !== id);
+            if (activeFlavorId === id) {
+                activeFlavorId = flavors[0].id;
+            }
+            saveState();
+            renderModalFlavorList();
+            renderFlavors();
+            updateActiveFlavorUI();
+        }
+
+        // --- Target Configuration Modal ---
+        function openTargetModal() {
+            document.getElementById('target-type-select').value = targetConfig.type;
+            document.getElementById('target-value-input').value = targetConfig.value;
+            toggleTargetTypeInput();
+            document.getElementById('target-modal').classList.remove('hidden');
+        }
+
+        function closeTargetModal() {
+            document.getElementById('target-modal').classList.add('hidden');
+        }
+
+        function toggleTargetTypeInput() {
+            const type = document.getElementById('target-type-select').value;
+            const label = document.getElementById('target-value-label');
+            label.textContent = type === 'revenue' ? 'Target Revenue (₱)' : 'Target Quantity (pieces)';
+        }
+
+        function saveTargetSettings() {
+            const type = document.getElementById('target-type-select').value;
+            const val = parseFloat(document.getElementById('target-value-input').value);
+
+            if (isNaN(val) || val <= 0) {
+                showToast('Enter a valid target', '⚠️');
+                return;
+            }
+
+            targetConfig = { type, value: val };
+            saveState();
+            calculateMetrics();
+            closeTargetModal();
+            showToast('Daily target updated!', '🎯');
+        }
+
+        // --- Export & Reset Data ---
+        function exportCSV() {
+            if (salesLog.length === 0) {
+                showToast('No sales data to export', 'ℹ️');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Transaction ID,Timestamp,Flavor,Quantity,Unit Price (PHP),Total Revenue (PHP)\n";
+
+            salesLog.forEach(row => {
+                csvContent += `${row.id},${row.timestamp},"${row.flavorName}",${row.quantity},${row.unitPrice},${row.totalPrice}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `ice_candy_sales_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Sales data exported to CSV', '📄');
+        }
+
+        function confirmReset() {
+            if (confirm("Are you sure you want to reset all of today's sales data? This cannot be undone.")) {
+                salesLog = [];
+                saveState();
+                renderFlavors();
+                updateActiveFlavorUI();
+                renderSalesHistory();
+                calculateMetrics();
+                showToast('Daily counter reset!', '🧹');
+            }
+        }
+
+        // --- Utilities ---
+        function showToast(message, icon = '✨') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            document.getElementById('toast-icon').textContent = icon;
+
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+    </script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
